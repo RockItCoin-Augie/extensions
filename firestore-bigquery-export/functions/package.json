@@ -8,7 +8,11 @@
     "clean": "rimraf lib",
     "compile": "tsc",
     "test": "jest",
+    "build:watch": "tsc --watch",
     "generate-readme": "firebase ext:info .. --markdown > ../README.md"
+  },
+  "engines": {
+    "node": "18"
   },
   "author": "Jan Wyszynski <wyszynski@google.com>",
   "license": "Apache-2.0",

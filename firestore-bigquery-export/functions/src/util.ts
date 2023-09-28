@@ -18,6 +18,7 @@ import { DocumentSnapshot } from "firebase-functions/lib/providers/firestore";
 import { Change } from "firebase-functions";
 
 import { ChangeType } from "@firebaseextensions/firestore-bigquery-change-tracker";
+import config from "./config";
 
 export function getChangeType(change: Change<DocumentSnapshot>): ChangeType {
   if (!change.after.exists) {
@@ -34,4 +35,23 @@ export function getDocumentId(change: Change<DocumentSnapshot>): string {
     return change.after.id;
   }
   return change.before.id;
+}
+
+export function hasValidChanges(data:any, old_data:any): boolean {
+  const  data_keys = Object.keys(data);
+  const old_keys = Object.keys(old_data);
+  var ignored_fields = config.ignoredFields || [];
+
+  // Field either added or deleted
+  if (JSON.stringify(data_keys) !== JSON.stringify(old_keys)) {
+      return true;
+  }
+  for (let i = 0; i< data_keys.length; i++){
+      let curr = data[data_keys[i]];
+      let old = old_data[old_keys[i]];
+      if((JSON.stringify(curr)!==JSON.stringify(old)) && (!ignored_fields.includes(data_keys[i]))) {
+          return true;
+      }
+  }
+  return false;
 }

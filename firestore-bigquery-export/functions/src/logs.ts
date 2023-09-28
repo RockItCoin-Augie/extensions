@@ -166,3 +166,11 @@ export const timestampMissingValue = (fieldName: string) => {
     `Missing value for timestamp field: ${fieldName}, using default timestamp instead.`
   );
 };
+
+export const logNoChange = () => {
+  logger.log(`Document did not have important changes`);
+};
+
+export const message = (str: string) => {
+  logger.log(`Message: ${str}`);
+};

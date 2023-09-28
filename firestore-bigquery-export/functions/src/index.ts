@@ -27,7 +27,7 @@ import { getFunctions } from "firebase-admin/functions";
 import { getExtensions } from "firebase-admin/extensions";
 import { getEventarc } from "firebase-admin/eventarc";
 import * as logs from "./logs";
-import { getChangeType, getDocumentId } from "./util";
+import { getChangeType, getDocumentId, hasValidChanges } from "./util";
 
 const eventTracker: FirestoreEventHistoryTracker =
   new FirestoreBigQueryEventHistoryTracker({
@@ -134,13 +134,17 @@ export const fsexportbigquery = functions
       const seializedData = eventTracker.serializeData(data);
       const serializedOldData = eventTracker.serializeData(oldData);
 
-      await queue.enqueue({
-        context,
-        changeType,
-        documentId,
-        data: seializedData,
-        oldData: serializedOldData,
-      });
+      if (hasValidChanges(seializedData, serializedOldData)){
+        await queue.enqueue({
+            context,
+            changeType,
+            documentId,
+            data: seializedData,
+            oldData: serializedOldData,
+        });
+      } else {
+        logs.logNoChange();
+      }
     } catch (err) {
       logs.error(err);
       const eventAgeMs = Date.now() - Date.parse(context.timestamp);
